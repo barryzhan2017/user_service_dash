@@ -58,7 +58,7 @@ layout = html.Div([
 
 
 # Show users information based on criteria, if searching for a specific user, we can update and delete it.
-@app.app.callback(
+@app.application.callback(
     [Output("user_info", "data"),
      Output("user_info", "columns"),
      Output("error_search", "children"),
@@ -100,7 +100,7 @@ def show_users(click, criteria, search_input):
 
 
 # Add users based on input value, all the fields are required.
-@app.app.callback(
+@app.application.callback(
     Output("error_add", "children"),
     [Input("add", "n_clicks")],
     [State("username", "value"),
@@ -126,7 +126,7 @@ def add_users(click, username, password, email, phone, slack_id, role):
 
 
 # Update users based on its editable field value, update not none or empty value
-@app.app.callback(
+@app.application.callback(
     Output("error_update", "children"),
     [Input("update", "n_clicks")],
     [State("user_info", "data")]
@@ -153,7 +153,7 @@ def update_users(click, data):
 
 
 # Delete users based on the id
-@app.app.callback(
+@app.application.callback(
     Output("error_delete", "children"),
     [Input("delete", "n_clicks")],
     [State("user_info", "data")]
