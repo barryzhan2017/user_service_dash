@@ -9,6 +9,7 @@ import dash
 
 login_endpoint = "/api/login"
 catalog_page = "http://signaldevv20-env.eba-2ibxmk54.us-east-2.elasticbeanstalk.com/"
+domain = ".us-east-2.elasticbeanstalk.com"
 
 layout = html.Div([
     html.H1("Dash Signal Login Page"),
@@ -49,7 +50,7 @@ def login(click, username, password):
             # Otherwise, a cookie will only be readable by the domain that set it.
             # httponly to prevent xss attack and secure to encode the token while transmission
             dash.callback_context.response.set_cookie("token", data["token"], httponly=True,
-                                                      secure=True, domain=catalog_page)
+                                                      secure=True, domain=domain)
             print(data["token"])
             #return dcc.Location(href=catalog_page, id="any"), " "
         return res_json["message"], data
