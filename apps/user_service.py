@@ -5,6 +5,7 @@ import dash_core_components as dcc
 import requests
 import dash_table
 import json
+import flask
 
 users_path = "/api/users"
 user_fields = ["user_id", "username", "password", "email", "phone",
@@ -52,7 +53,7 @@ layout = html.Div([
     html.Div([html.Button(id="delete", children="Delete", n_clicks=0),
               html.Button(id="update", children="Update", n_clicks=0)], id="operation", style={"display": "none"}),
     html.Div(id="error_update", style={"color": "red"}),
-    html.Div(id="error_delete", style={"color": "red"})
+    html.Div(id="error_delete", style={"color": "red"}),
 ])
 
 
@@ -68,12 +69,17 @@ layout = html.Div([
 )
 def show_users(click, criteria, search_input):
     if click != 0:
-        header = {"Authorization": app.token}
+        token = flask.request.cookies["token"]
+        header = {"Authorization": token}
         # Send to /api/users/<id> to get user by user id
         if criteria == "user_id":
+            if not search_input:
+                return [], [], "Value is empty", {"display": "none"}
             res = requests.get(app.user_service_url + users_path + "/" + search_input, headers=header)
         # Send to /api/users?username=xxx to get users by username
         elif criteria == "username":
+            if not search_input:
+                return [], [], "Value is empty", {"display": "none"}
             res = requests.get(app.user_service_url + users_path + "?username=" + search_input, headers=header)
         # Send to /api/users to get all users
         else:
@@ -108,7 +114,8 @@ def add_users(click, username, password, email, phone, slack_id, role):
     if click != 0:
         if not username or not password or not email or not phone or not slack_id or not role:
             return "All fields are required"
-        header = {"Authorization": app.token, "Content-Type": "application/json"}
+        token = flask.request.cookies["token"]
+        header = {"Authorization": token, "Content-Type": "application/json"}
         payload = {"username": username, "password": password, "email": email, "phone": phone, "slack_id": slack_id,
                    "role": role}
         print(payload)
@@ -136,7 +143,8 @@ def update_users(click, data):
                     user_id = user[field]
                 elif field != "created_date":
                     payload[field] = user[field]
-        header = {"Authorization": app.token, "Content-Type": "application/json"}
+        token = flask.request.cookies["token"]
+        header = {"Authorization": token, "Content-Type": "application/json"}
         res = requests.put(app.user_service_url + users_path + "/" + str(user_id), headers=header,
                            data=json.dumps(payload))
         res_json = res.json()
@@ -154,7 +162,8 @@ def delete_users(click, data):
     if click != 0:
         user = data[0]
         user_id = user["user_id"]
-        header = {"Authorization": app.token}
+        token = flask.request.cookies["token"]
+        header = {"Authorization": token}
         res = requests.delete(app.user_service_url + users_path + "/" + str(user_id), headers=header)
         res_json = res.json()
         return res_json["message"]
