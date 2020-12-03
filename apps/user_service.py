@@ -6,14 +6,19 @@ import requests
 import dash_table
 import json
 import flask
+import dash
+from cryptography.fernet import Fernet
 
 users_path = "/api/users"
 user_fields = ["user_id", "username", "password", "email", "phone",
                "slack_id", "role", "created_date"]
 editable_dic = {"user_id": False, "username": False, "password": True, "email": True, "phone": True,
                 "slack_id": True, "role": True, "created_date": False}
+login_page = app.page_url
 
 layout = html.Div([
+    dcc.Location(id='user_service_url', refresh=False),
+    html.Div(id='redirect_to_login'),
     html.H1("Dash Signal User Management"),
     html.H5("Add a user"),
     dcc.Input(id="username", type="text", placeholder="username"),
@@ -70,7 +75,6 @@ layout = html.Div([
 def show_users(click, criteria, search_input):
     if click != 0:
         token = flask.request.cookies["token"]
-        print("second" + flask.request.cookies["token"])
         header = {"Authorization": token}
         # Send to /api/users/<id> to get user by user id
         if criteria == "user_id":
@@ -85,8 +89,9 @@ def show_users(click, criteria, search_input):
         # Send to /api/users to get all users
         else:
             res = requests.get(app.user_service_url + users_path, headers=header)
+        if res.status_code == 400:
+            return dcc.Location(href=login_page, id="any")
         res_json = res.json()
-        print(res_json)
         # Remove all password value
         if res.status_code == 200:
             for data in res_json["data"]:
@@ -121,8 +126,9 @@ def add_users(click, username, password, email, phone, slack_id, role):
         header = {"Authorization": token, "Content-Type": "application/json"}
         payload = {"username": username, "password": password, "email": email, "phone": phone, "slack_id": slack_id,
                    "role": role}
-        print(payload)
         res = requests.post(app.user_service_url + users_path, headers=header, data=json.dumps(payload))
+        if res.status_code == 400:
+            return dcc.Location(href=login_page, id="any")
         res_json = res.json()
         return res_json["message"]
     return ""
@@ -150,6 +156,8 @@ def update_users(click, data):
         header = {"Authorization": token, "Content-Type": "application/json"}
         res = requests.put(app.user_service_url + users_path + "/" + str(user_id), headers=header,
                            data=json.dumps(payload))
+        if res.status_code == 400:
+            return dcc.Location(href=login_page, id="any")
         res_json = res.json()
         return res_json["message"]
     return ""
@@ -168,6 +176,25 @@ def delete_users(click, data):
         token = flask.request.cookies["token"]
         header = {"Authorization": token}
         res = requests.delete(app.user_service_url + users_path + "/" + str(user_id), headers=header)
+        if res.status_code == 400:
+            return dcc.Location(href=login_page, id="any")
         res_json = res.json()
         return res_json["message"]
     return ""
+
+
+# Check if the incoming authentication token is in the url. If so, store the decoded one in cookie
+@app.app.callback(Output('redirect_to_login', 'children'),
+                  [Input('user_service_url', 'href')])
+def check_token(pathname):
+    # Format: http://xxx/xxxx?token=dadaedas
+    path_info = pathname.split("?token=")
+    # Does not contain token
+    print(pathname)
+    if len(path_info) != 2:
+        return dcc.Location(href=login_page, id="any")
+    signed_token = path_info[1]
+    f = Fernet(app.secret)
+    token = f.decrypt(signed_token.encode("utf-8")).decode("utf-8")
+    print(token)
+    dash.callback_context.response.set_cookie("token", token, httponly=True)

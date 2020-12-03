@@ -16,10 +16,10 @@ app.layout = html.Div([
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    if pathname == '/':
-        return login.layout
-    elif pathname == '/users':
+    if pathname.startswith("/users"):
         return user_service.layout
+    elif pathname == "/":
+        return login.layout
     else:
         return '404'
 

@@ -5,11 +5,10 @@ from dash.dependencies import Input, Output, State
 import requests
 import json
 import dash
-
+from cryptography.fernet import Fernet
 
 login_endpoint = "/api/login"
 catalog_page = "http://signaldevv20-env.eba-2ibxmk54.us-east-2.elasticbeanstalk.com/"
-domain = ".us-east-2.elasticbeanstalk.com"
 
 layout = html.Div([
     html.H1("Dash Signal Login Page"),
@@ -35,6 +34,7 @@ layout = html.Div([
 )
 def login(click, username, password):
     if click != 0:
+        f = Fernet(app.secret)
         data = dict()
         if username is None or password is None:
             return "Username and password are required"
@@ -49,10 +49,9 @@ def login(click, username, password):
             # that is readable by the domain www.example.com, foo.example.com etc.
             # Otherwise, a cookie will only be readable by the domain that set it.
             # httponly to prevent xss attack and secure to encode the token while transmission
-            print("first " + data["token"])
-            dash.callback_context.response.set_cookie("token", data["token"], httponly=True, domain=domain)
+            dash.callback_context.response.set_cookie("token", data["token"], httponly=True)
             # False configuration, cannot save token: httponly=True,secure=True, domain=domain
             # Redirect to catalog page
-            return dcc.Location(href=catalog_page, id="any"), " "
+            return dcc.Location(href=catalog_page+"?token=" + f.encrypt(data["token"].encode("utf-8")).decode("utf-8"), id="any"), " "
         return res_json["message"], data
     return "", {}
