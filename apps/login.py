@@ -50,9 +50,9 @@ def login(click, username, password):
             # Otherwise, a cookie will only be readable by the domain that set it.
             # httponly to prevent xss attack and secure to encode the token while transmission
             print("first " + data["token"])
-            dash.callback_context.response.set_cookie("token", data["token"], httponly=True, domain=None)
+            dash.callback_context.response.set_cookie("token", data["token"], httponly=True, domain=domain)
             # False configuration, cannot save token: httponly=True,secure=True, domain=domain
-            # Redirect to catalog page if login
+            # Redirect to catalog page
             return dcc.Location(href=catalog_page, id="any"), " "
         return res_json["message"], data
     return "", {}
