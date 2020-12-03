@@ -26,7 +26,7 @@ layout = html.Div([
 ])
 
 
-@app.application.callback(
+@app.app.callback(
     [Output("error_login", "children"),
      Output("session", "data")],
     [Input("submit", "n_clicks")],

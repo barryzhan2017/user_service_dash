@@ -2,17 +2,18 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from app import application
+from app import app
 from apps import login, user_service
 
+application = app.server
 
-application.layout = html.Div([
+app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content'),
 ])
 
 
-@application.callback(Output('page-content', 'children'),
+@app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/':
@@ -23,4 +24,4 @@ def display_page(pathname):
         return '404'
 
 if __name__ == '__main__':
-    application.run_server(debug=True, port=8080)
+    application.run(debug=True, port=8080)
