@@ -70,6 +70,7 @@ layout = html.Div([
 def show_users(click, criteria, search_input):
     if click != 0:
         token = flask.request.cookies["token"]
+        print("second" + flask.request.cookies["token"])
         header = {"Authorization": token}
         # Send to /api/users/<id> to get user by user id
         if criteria == "user_id":
@@ -85,9 +86,11 @@ def show_users(click, criteria, search_input):
         else:
             res = requests.get(app.user_service_url + users_path, headers=header)
         res_json = res.json()
+        print(res_json)
         # Remove all password value
-        for data in res_json["data"]:
-            data["password"] = ""
+        if res.status_code == 200:
+            for data in res_json["data"]:
+                data["password"] = ""
         # If we query based on username or user id, we should be able to update and delete that user
         if res.status_code == 200 and (criteria == "user_id" or criteria == "username" and len(res_json["data"]) == 1):
             return res_json["data"], [{"id": p, "name": p, "editable": editable_dic[p]} for p in user_fields], "", {

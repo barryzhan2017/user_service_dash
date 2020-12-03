@@ -49,9 +49,10 @@ def login(click, username, password):
             # that is readable by the domain www.example.com, foo.example.com etc.
             # Otherwise, a cookie will only be readable by the domain that set it.
             # httponly to prevent xss attack and secure to encode the token while transmission
-            dash.callback_context.response.set_cookie("token", data["token"], httponly=True,
-                                                      secure=True, domain=domain)
-            print(data["token"])
+            print("first " + data["token"])
+            dash.callback_context.response.set_cookie("token", data["token"], httponly=True, domain=None)
+            # httponly=True,secure=True, domain=domain
+
             #return dcc.Location(href=catalog_page, id="any"), " "
         return res_json["message"], data
     return "", {}
