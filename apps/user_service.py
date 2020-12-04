@@ -7,7 +7,7 @@ import dash_table
 import json
 import flask
 import dash
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 
 users_path = "/api/users"
 user_fields = ["user_id", "username", "password", "email", "phone",
@@ -195,6 +195,8 @@ def check_token(pathname):
         return dcc.Location(href=login_page, id="any")
     signed_token = path_info[1]
     f = Fernet(app.secret)
-    token = f.decrypt(signed_token.encode("utf-8")).decode("utf-8")
-    print(token)
+    try:
+        token = f.decrypt(signed_token.encode("utf-8")).decode("utf-8")
+    except (InvalidToken, TypeError):
+        return dcc.Location(href=login_page, id="any")
     dash.callback_context.response.set_cookie("token", token, httponly=True)
