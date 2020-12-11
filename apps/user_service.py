@@ -11,9 +11,9 @@ from cryptography.fernet import Fernet, InvalidToken
 
 users_path = "/api/users"
 user_fields = ["user_id", "username", "password", "email", "phone",
-               "slack_id", "role", "created_date"]
+               "slack_id", "role", "created_date", "status", "address"]
 editable_dic = {"user_id": False, "username": False, "password": True, "email": True, "phone": True,
-                "slack_id": True, "role": True, "created_date": False}
+                "slack_id": True, "role": True, "created_date": False, "status": False, "address": True}
 login_page = app.page_url
 
 layout = html.Div([
@@ -26,6 +26,7 @@ layout = html.Div([
     dcc.Input(id="email", type="text", placeholder="email"),
     dcc.Input(id="phone", type="text", placeholder="phone"),
     dcc.Input(id="slack_id", type="text", placeholder="slack_id"),
+    dcc.Input(id="address", type="text", placeholder="address"),
     dcc.Dropdown(id="role",
                  placeholder="role",
                  options=[
@@ -116,16 +117,17 @@ def show_users(click, criteria, search_input):
      State("email", "value"),
      State("phone", "value"),
      State("slack_id", "value"),
-     State("role", "value")]
+     State("role", "value"),
+     State("address", "value")]
 )
-def add_users(click, username, password, email, phone, slack_id, role):
+def add_users(click, username, password, email, phone, slack_id, role, address):
     if click != 0:
         if not username or not password or not email or not phone or not slack_id or not role:
             return "All fields are required"
         token = flask.request.cookies["token"]
         header = {"Authorization": token, "Content-Type": "application/json"}
         payload = {"username": username, "password": password, "email": email, "phone": phone, "slack_id": slack_id,
-                   "role": role}
+                   "role": role, "address": address, "status": "active"}
         res = requests.post(app.user_service_url + users_path, headers=header, data=json.dumps(payload))
         if res.status_code == 400:
             return dcc.Location(href=login_page, id="any")
