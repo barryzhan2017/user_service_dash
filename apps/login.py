@@ -6,8 +6,9 @@ import requests
 import json
 import dash
 from cryptography.fernet import Fernet
+import re
 
-
+regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
 registration_endpoint = "/api/registration"
 login_endpoint = "/api/login"
 catalog_page = "http://signaldevv20-env.eba-2ibxmk54.us-east-2.elasticbeanstalk.com/"
@@ -91,6 +92,8 @@ def add_users(click, username, password, email, phone, slack_id, role, address):
     if click != 0:
         if not username or not password or not email or not phone or not slack_id or not role:
             return "All fields are required"
+        if not re.search(regex, email):
+            return "Email format is incorrect"
         header = {"Content-Type": "application/json"}
         # Inactive status for a new user
         payload = {"username": username, "password": password, "email": email, "phone": phone, "slack_id": slack_id,

@@ -8,7 +8,10 @@ import json
 import flask
 import dash
 from cryptography.fernet import Fernet, InvalidToken
+import re
 
+
+regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
 users_path = "/api/users"
 user_fields = ["user_id", "username", "password", "email", "phone",
                "slack_id", "role", "created_date", "status", "address"]
@@ -124,6 +127,8 @@ def add_users(click, username, password, email, phone, slack_id, role, address):
     if click != 0:
         if not username or not password or not email or not phone or not slack_id or not role:
             return "All fields are required"
+        if not re.search(regex, email):
+            return "Email format is incorrect"
         token = flask.request.cookies["token"]
         header = {"Authorization": token, "Content-Type": "application/json"}
         payload = {"username": username, "password": password, "email": email, "phone": phone, "slack_id": slack_id,
@@ -145,6 +150,8 @@ def add_users(click, username, password, email, phone, slack_id, role, address):
 def update_users(click, data):
     if click != 0:
         user = data[0]
+        if "email" in user and not re.search(regex, user["email"]):
+            return "Email format is incorrect"
         payload = dict()
         user_id = 0
         for field in user_fields:
