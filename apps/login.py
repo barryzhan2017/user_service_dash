@@ -7,6 +7,8 @@ import json
 import dash
 from cryptography.fernet import Fernet
 
+
+registration_endpoint = "/api/registration"
 login_endpoint = "/api/login"
 catalog_page = "http://signaldevv20-env.eba-2ibxmk54.us-east-2.elasticbeanstalk.com/"
 
@@ -21,13 +23,29 @@ layout = html.Div([
     html.Button(id='submit', children="Sign in", n_clicks=0),
     html.Br(),
     html.Div(id='error_login', style={'color': 'red'}),
-    dcc.Store(id='session', storage_type='session')
+    html.Br(),
+    html.H5("Registration"),
+    dcc.Input(id="username_reg", type="text", placeholder="username"),
+    dcc.Input(id="password_reg", type="password", placeholder="password"),
+    dcc.Input(id="email_reg", type="text", placeholder="email"),
+    dcc.Input(id="phone_reg", type="text", placeholder="phone"),
+    dcc.Input(id="slack_id_reg", type="text", placeholder="slack_id"),
+    dcc.Input(id="address_reg", type="text", placeholder="address"),
+    dcc.Dropdown(id="role_reg",
+                 placeholder="role",
+                 options=[
+                     {"label": "support", "value": "support"},
+                     {"label": "ip", "value": "ip"},
+                 ],
+                 style={"width": "30%"}
+                 ),
+    html.Button(id="register", children="Register", n_clicks=0),
+    html.Div(id="error_register", style={"color": "red"})
 ])
 
 
 @app.app.callback(
-    [Output("error_login", "children"),
-     Output("session", "data")],
+    Output("error_login", "children"),
     [Input("submit", "n_clicks")],
     [State("username", "value"),
      State("password", "value")]
@@ -53,5 +71,31 @@ def login(click, username, password):
             # False configuration, cannot save token: httponly=True,secure=True, domain=domain
             # Redirect to catalog page
             return dcc.Location(href=catalog_page+"?token=" + f.encrypt(data["token"].encode("utf-8")).decode("utf-8"), id="any"), " "
-        return res_json["message"], data
-    return "", {}
+        return res_json["message"]
+    return ""
+
+
+# Add users based on input value, all the fields are required.
+@app.app.callback(
+    Output("error_register", "children"),
+    [Input("register", "n_clicks")],
+    [State("username_reg", "value"),
+     State("password_reg", "value"),
+     State("email_reg", "value"),
+     State("phone_reg", "value"),
+     State("slack_id_reg", "value"),
+     State("role_reg", "value"),
+     State("address_reg", "value")]
+)
+def add_users(click, username, password, email, phone, slack_id, role, address):
+    if click != 0:
+        if not username or not password or not email or not phone or not slack_id or not role:
+            return "All fields are required"
+        header = {"Content-Type": "application/json"}
+        # Inactive status for a new user
+        payload = {"username": username, "password": password, "email": email, "phone": phone, "slack_id": slack_id,
+                   "role": role, "address": address, "status": "inactive"}
+        res = requests.post(app.user_service_url + registration_endpoint, headers=header, data=json.dumps(payload))
+        res_json = res.json()
+        return res_json["message"]
+    return ""
