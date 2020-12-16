@@ -11,7 +11,7 @@ import re
 regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
 registration_endpoint = "/api/registration"
 login_endpoint = "/api/login"
-catalog_page = "http://signaldevv20-env.eba-2ibxmk54.us-east-2.elasticbeanstalk.com/"
+catalog_page = app.catalog_url
 
 layout = html.Div([
     html.H1("Dash Signal Login Page"),

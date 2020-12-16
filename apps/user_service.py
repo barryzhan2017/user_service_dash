@@ -17,7 +17,9 @@ user_fields = ["user_id", "username", "password", "email", "phone",
                "slack_id", "role", "created_date", "status", "address"]
 editable_dic = {"user_id": False, "username": False, "password": True, "email": True, "phone": True,
                 "slack_id": True, "role": True, "created_date": False, "status": False, "address": True}
-login_page = app.page_url
+login_page = app.user_service_dash_url
+catalog_page = app.catalog_url
+
 
 layout = html.Div([
     dcc.Location(id='user_service_url', refresh=False),
@@ -63,6 +65,8 @@ layout = html.Div([
               html.Button(id="update", children="Update", n_clicks=0)], id="operation", style={"display": "none"}),
     html.Div(id="error_update", style={"color": "red"}),
     html.Div(id="error_delete", style={"color": "red"}),
+    html.Button(id="back", children="Back", n_clicks=0),
+    html.Div(id="nothing")
 ])
 
 
@@ -191,6 +195,15 @@ def delete_users(click, data):
         return res_json["message"]
     return ""
 
+# Return back to catalog page
+@app.app.callback(
+    Output("nothing", "children"),
+    [Input("back", "n_clicks")]
+)
+def back(click):
+    if click != 0:
+        return dcc.Location(href=catalog_page, id="any")
+    return ""
 
 # Check if the incoming authentication token is in the url. If so, store the decoded one in cookie
 @app.app.callback(Output('redirect_to_login', 'children'),
