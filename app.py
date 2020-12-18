@@ -7,3 +7,5 @@ catalog_url = "http://signaldevv20-env.eba-2ibxmk54.us-east-2.elasticbeanstalk.c
 user_service_dash_url = "http://user-service-dash.eba-y82cxuwr.us-east-2.elasticbeanstalk.com/"
 app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=external_stylesheets)
 secret = os.environ['TOKEN_SECRET'].encode('utf-8')
+auth_id = os.environ['SMARTY_AUTH_ID']
+auth_token = os.environ['SMARTY_AUTH_TOKEN']
