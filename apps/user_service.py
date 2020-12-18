@@ -10,7 +10,6 @@ import dash
 from cryptography.fernet import Fernet, InvalidToken
 import re
 
-
 regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
 users_path = "/api/users"
 user_fields = ["user_id", "username", "password", "email", "phone",
@@ -19,7 +18,6 @@ editable_dic = {"user_id": False, "username": False, "password": True, "email": 
                 "slack_id": True, "role": True, "created_date": False, "status": False, "address": True}
 login_page = app.user_service_dash_url
 catalog_page = app.catalog_url
-
 
 layout = html.Div([
     dcc.Location(id='user_service_url', refresh=False),
@@ -195,6 +193,7 @@ def delete_users(click, data):
         return res_json["message"]
     return ""
 
+
 # Return back to catalog page
 @app.app.callback(
     Output("nothing", "children"),
@@ -202,8 +201,12 @@ def delete_users(click, data):
 )
 def back(click):
     if click != 0:
-        return dcc.Location(href=catalog_page, id="any")
+        fernet = Fernet(app.secret)
+        return dcc.Location(href=catalog_page + "?token=" +
+                            fernet.encrypt(flask.request.cookies["token"].encode("utf-8")).decode("utf-8"),
+                            id="any")
     return ""
+
 
 # Check if the incoming authentication token is in the url. If so, store the decoded one in cookie
 @app.app.callback(Output('redirect_to_login', 'children'),

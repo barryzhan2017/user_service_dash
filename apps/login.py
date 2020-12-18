@@ -7,11 +7,14 @@ import json
 import dash
 from cryptography.fernet import Fernet
 import re
+from smartystreets_python_sdk import StaticCredentials, ClientBuilder
+from smartystreets_python_sdk.us_autocomplete import Lookup as AutocompleteLookup
 
-regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+regex = "^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$"
 registration_endpoint = "/api/registration"
 login_endpoint = "/api/login"
 catalog_page = app.catalog_url
+suggestions = ["valid", "options", "as", "suggestions"]
 
 layout = html.Div([
     html.H1("Dash Signal Login Page"),
@@ -31,7 +34,7 @@ layout = html.Div([
     dcc.Input(id="email_reg", type="text", placeholder="email"),
     dcc.Input(id="phone_reg", type="text", placeholder="phone"),
     dcc.Input(id="slack_id_reg", type="text", placeholder="slack_id"),
-    dcc.Input(id="address_reg", type="text", placeholder="address"),
+    dcc.Input(id="address_reg", type="text", placeholder="address", list='suggest_address'),
     dcc.Dropdown(id="role_reg",
                  placeholder="role",
                  options=[
@@ -41,7 +44,10 @@ layout = html.Div([
                  style={"width": "30%"}
                  ),
     html.Button(id="register", children="Register", n_clicks=0),
-    html.Div(id="error_register", style={"color": "red"})
+    html.Div(id="error_register", style={"color": "red"}),
+    html.Datalist(
+        id='suggest_address',
+        children=[html.Option(value=word) for word in suggestions])
 ])
 
 
@@ -71,7 +77,8 @@ def login(click, username, password):
             dash.callback_context.response.set_cookie("token", data["token"], httponly=True)
             # False configuration, cannot save token: httponly=True,secure=True, domain=domain
             # Redirect to catalog page
-            return dcc.Location(href=catalog_page+"?token=" + f.encrypt(data["token"].encode("utf-8")).decode("utf-8"), id="any"), " "
+            return dcc.Location(
+                href=catalog_page + "?token=" + f.encrypt(data["token"].encode("utf-8")).decode("utf-8"), id="any"), " "
         return res_json["message"]
     return ""
 
@@ -102,3 +109,20 @@ def add_users(click, username, password, email, phone, slack_id, role, address):
         res_json = res.json()
         return res_json["message"]
     return ""
+
+
+# Autocomplete the address fields by sending request to smartstreet
+@app.app.callback(
+    Output("suggest_address", "children"),
+    [Input("address_reg", "value")]
+)
+def update_address(address):
+    credentials = StaticCredentials(app.auth_id, app.auth_token)
+    client = ClientBuilder(credentials).build_us_autocomplete_api_client()
+    if address:
+        lookup = AutocompleteLookup(address)
+        client.send(lookup)
+        for suggestion in lookup.result:
+            print(suggestion.text)
+        return [html.Option(value=suggestion.text) for suggestion in lookup.result]
+    return []
