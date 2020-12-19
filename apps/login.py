@@ -34,7 +34,7 @@ layout = html.Div([
     dcc.Input(id="email_reg", type="text", placeholder="email"),
     dcc.Input(id="phone_reg", type="text", placeholder="phone"),
     dcc.Input(id="slack_id_reg", type="text", placeholder="slack_id"),
-    dcc.Input(id="address_reg", type="text", placeholder="address", list='suggest_address'),
+    dcc.Input(id="address_reg", type="text", placeholder="[street, city state]", list='suggest_address'),
     dcc.Dropdown(id="role_reg",
                  placeholder="role",
                  options=[
