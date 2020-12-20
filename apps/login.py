@@ -12,9 +12,10 @@ from smartystreets_python_sdk.us_autocomplete import Lookup as AutocompleteLooku
 
 regex = "^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$"
 registration_endpoint = "/api/registration"
+g_login_endpoint = "/api/g_login"
 login_endpoint = "/api/login"
 catalog_page = app.catalog_url
-suggestions = ["valid", "options", "as", "suggestions"]
+suggestions = []
 
 layout = html.Div([
     html.H1("Dash Signal Login Page"),
@@ -26,6 +27,9 @@ layout = html.Div([
     html.Br(),
     html.Button(id='submit', children="Sign in", n_clicks=0),
     html.Br(),
+    html.Button(id='OAuth2', children="Sign in by Google", n_clicks=0),
+    html.Br(),
+    html.Div(id="OAuth2_result"),
     html.Div(id='error_login', style={'color': 'red'}),
     html.Br(),
     html.H5("Registration"),
@@ -126,3 +130,15 @@ def update_address(address):
             print(suggestion.text)
         return [html.Option(value=suggestion.text) for suggestion in lookup.result]
     return []
+
+
+# Go to server side api to get enable goolge verification
+@app.app.callback(
+    Output("OAuth2_result", "children"),
+    [Input("OAuth2", "n_clicks")]
+)
+def oauth2_login(click):
+    if click != 0:
+        return dcc.Location(
+            href=app.user_service_url + g_login_endpoint, id="any")
+    return ""
