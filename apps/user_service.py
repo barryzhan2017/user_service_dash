@@ -212,18 +212,20 @@ def back(click):
 @app.app.callback(Output('redirect_to_login', 'children'),
                   [Input('user_service_url', 'href')])
 def check_token(pathname):
-    # Format: http://xxx/xxxx?token=dadaedas
-    path_info = pathname.split("?token=")
-    # Does not contain token
-    print(pathname)
-    if len(path_info) != 2:
-        print("wrong format")
-        return dcc.Location(href=login_page, id="any")
-    signed_token = path_info[1]
-    f = Fernet(app.secret)
-    try:
-        token = f.decrypt(signed_token.encode("utf-8")).decode("utf-8")
-    except (InvalidToken, TypeError):
-        print("wrong token")
-        return dcc.Location(href=login_page, id="any")
-    dash.callback_context.response.set_cookie("token", token, httponly=True)
+    # Only check if we do not store token in the session
+    if "token" not in flask.request.cookies:
+        # Format: http://xxx/xxxx?token=dadaedas
+        path_info = pathname.split("?token=")
+        # Does not contain token
+        print(pathname)
+        if len(path_info) != 2:
+            print("wrong format")
+            return dcc.Location(href=login_page, id="any")
+        signed_token = path_info[1]
+        f = Fernet(app.secret)
+        try:
+            token = f.decrypt(signed_token.encode("utf-8")).decode("utf-8")
+        except (InvalidToken, TypeError):
+            print("wrong token")
+            return dcc.Location(href=login_page, id="any")
+        dash.callback_context.response.set_cookie("token", token, httponly=True)
