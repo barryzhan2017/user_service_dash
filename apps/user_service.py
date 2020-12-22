@@ -95,7 +95,7 @@ def show_users(click, criteria, search_input):
         # Send to /api/users to get all users
         else:
             res = requests.get(app.user_service_url + users_path, headers=header)
-        if res.status_code == 400:
+        if res.status_code != 200:
             return dcc.Location(href=login_page, id="any")
         res_json = res.json()
         # Remove all password value
@@ -136,7 +136,7 @@ def add_users(click, username, password, email, phone, slack_id, role, address):
         payload = {"username": username, "password": password, "email": email, "phone": phone, "slack_id": slack_id,
                    "role": role, "address": address, "status": "active"}
         res = requests.post(app.user_service_url + users_path, headers=header, data=json.dumps(payload))
-        if res.status_code == 400:
+        if res.status_code != 200:
             return dcc.Location(href=login_page, id="any")
         res_json = res.json()
         return res_json["message"]
@@ -167,7 +167,7 @@ def update_users(click, data):
         header = {"Authorization": token, "Content-Type": "application/json"}
         res = requests.put(app.user_service_url + users_path + "/" + str(user_id), headers=header,
                            data=json.dumps(payload))
-        if res.status_code == 400:
+        if res.status_code != 200:
             return dcc.Location(href=login_page, id="any")
         res_json = res.json()
         return res_json["message"]
@@ -187,7 +187,7 @@ def delete_users(click, data):
         token = flask.request.cookies["token"]
         header = {"Authorization": token}
         res = requests.delete(app.user_service_url + users_path + "/" + str(user_id), headers=header)
-        if res.status_code == 400:
+        if res.status_code != 200:
             return dcc.Location(href=login_page, id="any")
         res_json = res.json()
         return res_json["message"]
