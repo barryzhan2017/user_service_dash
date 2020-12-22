@@ -213,7 +213,6 @@ def back(click):
                   [Input('user_service_url', 'href')])
 def check_token(pathname):
     # Only check if we do not store token in the session
-
     # Format: http://xxx/xxxx?token=dadaedas
     path_info = pathname.split("?token=")
     # Does not contain token

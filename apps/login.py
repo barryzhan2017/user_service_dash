@@ -140,5 +140,5 @@ def update_address(address):
 def oauth2_login(click):
     if click != 0:
         return dcc.Location(
-            href=app.user_service_url + g_login_endpoint, id="any")
+            href=app.user_service_g_login_url + g_login_endpoint, id="any")
     return ""
