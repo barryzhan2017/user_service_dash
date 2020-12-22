@@ -96,7 +96,10 @@ def show_users(click, criteria, search_input):
         else:
             res = requests.get(app.user_service_url + users_path, headers=header)
         if res.status_code != 200:
-            return dcc.Location(href=login_page, id="any")
+            return dcc.Location(href=login_page, id="any"), \
+                   dcc.Location(href=login_page, id="any"), \
+                   dcc.Location(href=login_page, id="any"), \
+                   dcc.Location(href=login_page, id="any")
         res_json = res.json()
         # Remove all password value
         if res.status_code == 200:
