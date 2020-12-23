@@ -80,8 +80,7 @@ layout = html.Div([
 )
 def show_users(click, criteria, search_input):
     if click != 0:
-        token = flask.request.cookies["token"]
-        header = {"Authorization": token}
+        header = app.create_header_with_token(flask.request.cookies["token"])
         # Send to /api/users/<id> to get user by user id
         if criteria == "user_id":
             if not search_input:
@@ -134,11 +133,10 @@ def add_users(click, username, password, email, phone, slack_id, role, address):
             return "All fields are required"
         if not re.search(regex, email):
             return "Email format is incorrect"
-        token = flask.request.cookies["token"]
-        header = {"Authorization": token, "Content-Type": "application/json"}
         payload = {"username": username, "password": password, "email": email, "phone": phone, "slack_id": slack_id,
                    "role": role, "address": address, "status": "active"}
-        res = requests.post(app.user_service_url + users_path, headers=header, data=json.dumps(payload))
+        res = requests.post(app.user_service_url + users_path,
+                            headers=app.create_header_with_token(flask.request.cookies["token"]), data=json.dumps(payload))
         if res.status_code != 200:
             return dcc.Location(href=login_page, id="any")
         res_json = res.json()
@@ -166,9 +164,8 @@ def update_users(click, data):
                     user_id = user[field]
                 elif field != "created_date":
                     payload[field] = user[field]
-        token = flask.request.cookies["token"]
-        header = {"Authorization": token, "Content-Type": "application/json"}
-        res = requests.put(app.user_service_url + users_path + "/" + str(user_id), headers=header,
+        res = requests.put(app.user_service_url + users_path + "/" + str(user_id),
+                           headers=app.create_header_with_token(flask.request.cookies["token"]),
                            data=json.dumps(payload))
         if res.status_code != 200:
             return dcc.Location(href=login_page, id="any")
@@ -187,9 +184,8 @@ def delete_users(click, data):
     if click != 0:
         user = data[0]
         user_id = user["user_id"]
-        token = flask.request.cookies["token"]
-        header = {"Authorization": token}
-        res = requests.delete(app.user_service_url + users_path + "/" + str(user_id), headers=header)
+        res = requests.delete(app.user_service_url + users_path + "/" + str(user_id),
+                              headers=app.create_header_with_token(flask.request.cookies["token"]))
         if res.status_code != 200:
             return dcc.Location(href=login_page, id="any")
         res_json = res.json()
@@ -206,7 +202,7 @@ def back(click):
     if click != 0:
         fernet = Fernet(app.secret)
         return dcc.Location(href=catalog_page + "?token=" +
-                            fernet.encrypt(flask.request.cookies["token"].encode("utf-8")).decode("utf-8"),
+                                 fernet.encrypt(flask.request.cookies["token"].encode("utf-8")).decode("utf-8"),
                             id="any")
     return ""
 

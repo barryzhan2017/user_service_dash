@@ -11,3 +11,9 @@ secret = os.environ['TOKEN_SECRET'].encode('utf-8')
 auth_id = os.environ['SMARTY_AUTH_ID']
 auth_token = os.environ['SMARTY_AUTH_TOKEN']
 invalid_token_status_code = 401
+
+
+# Create header containing token
+def create_header_with_token(token):
+    header = {"Authorization": token, "Content-Type": "application/json"}
+    return header

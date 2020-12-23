@@ -67,9 +67,9 @@ def login(click, username, password):
         data = dict()
         if username is None or password is None:
             return "Username and password are required"
-        header = {"Content-Type": "application/json"}
         payload = {"username": username, "password": password}
-        res = requests.post(app.user_service_url + login_endpoint, headers=header, data=json.dumps(payload))
+        res = requests.post(app.user_service_url + login_endpoint,
+                            headers=app.create_header_with_token("placeholder"), data=json.dumps(payload))
         res_json = res.json()
         if res.status_code == 200:
             data["token"] = res_json["token"]
@@ -105,11 +105,11 @@ def add_users(click, username, password, email, phone, slack_id, role, address):
             return "All fields are required"
         if not re.search(regex, email):
             return "Email format is incorrect"
-        header = {"Content-Type": "application/json"}
         # Inactive status for a new user
         payload = {"username": username, "password": password, "email": email, "phone": phone, "slack_id": slack_id,
                    "role": role, "address": address, "status": "inactive"}
-        res = requests.post(app.user_service_url + registration_endpoint, headers=header, data=json.dumps(payload))
+        res = requests.post(app.user_service_url + registration_endpoint,
+                            headers=app.create_header_with_token("placeholder"), data=json.dumps(payload))
         res_json = res.json()
         return res_json["message"]
     return ""
