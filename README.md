@@ -5,3 +5,5 @@ It uses python dash framework to create user_service-related pages and interact 
     * Main file should be called **application.py**
     * Use ```application = app.server``` and ```application.run(debug=True, port=8080)``` to run the server
     * Port should be **8080**
+
+More details should be seen in backend repo: https://github.com/barryzhan2017/user_service.
