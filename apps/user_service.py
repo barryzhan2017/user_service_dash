@@ -14,7 +14,7 @@ regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
 users_path = "/api/users"
 user_fields = ["user_id", "username", "password", "email", "phone",
                "slack_id", "role", "created_date", "status", "address"]
-editable_dic = {"user_id": False, "username": False, "password": True, "email": True, "phone": True,
+editable_dic = {"user_id": False, "username": False, "password": True, "email": False, "phone": True,
                 "slack_id": True, "role": True, "created_date": False, "status": False, "address": True}
 login_page = app.user_service_dash_url
 catalog_page = app.catalog_url
